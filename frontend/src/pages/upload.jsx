@@ -1,11 +1,15 @@
-import { useRef, useState } 
-from "react";
+import { useRef, useState } from "react";
 import "./upload.css";
 
 function Upload() {
   const fileInputRef = useRef(null);
+
   const [image, setImage] = useState(null);
   const [fileName, setFileName] = useState("");
+  const [selectedFile, setSelectedFile] = useState(null);
+
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState(null);
 
   const handleFile = (file) => {
     if (!file) return;
@@ -17,6 +21,8 @@ function Upload() {
 
     setImage(URL.createObjectURL(file));
     setFileName(file.name);
+    setSelectedFile(file);
+    setResult(null);
   };
 
   const handleFileChange = (event) => {
@@ -31,7 +37,66 @@ function Upload() {
   const removeImage = () => {
     setImage(null);
     setFileName("");
+    setSelectedFile(null);
+    setResult(null);
   };
+
+  const analyzePlant = async () => {
+    if (!selectedFile) {
+      alert("Please select a plant image first.");
+      return;
+    }
+
+    setLoading(true);
+    setResult(null);
+
+    const formData = new FormData();
+    formData.append("file", selectedFile);
+
+    try {
+      const response = await fetch("http://127.0.0.1:8000/analyze", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Backend request failed");
+      }
+
+      const data = await response.json();
+
+      setResult({
+        prediction: data.prediction,
+        confidence: data.confidence,
+      });
+
+    } catch (error) {
+      console.error(error);
+
+      setResult({
+        error:
+          "Backend connection failed. Please make sure the Python server is running.",
+      });
+
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatPrediction = (prediction) => {
+    if (!prediction) return "";
+
+    return prediction
+      .replace(/___/g, " - ")
+      .replace(/_/g, " ");
+  };
+
+  const isHealthy =
+    result?.prediction?.toLowerCase().includes("healthy");
+
+  const recommendation = isHealthy
+    ? "Your plant appears healthy. Continue proper watering, sunlight and regular monitoring."
+    : "Remove badly affected leaves, maintain good air circulation and avoid watering the leaves directly.";
 
   return (
     <div className="upload-page">
@@ -44,7 +109,9 @@ function Upload() {
       <div className="upload-container">
 
         <div className="upload-intro">
-          <span className="upload-badge">🌱 PLANT HEALTH CHECK</span>
+          <span className="upload-badge">
+            🌱 PLANT HEALTH CHECK
+          </span>
 
           <h1>
             Upload Your
@@ -135,9 +202,55 @@ function Upload() {
         </div>
 
         {image && (
-          <button className="analyze-btn">
-            🔍 Analyze Plant Health
-          </button>
+          <>
+            <button
+              className="analyze-btn"
+              onClick={analyzePlant}
+              disabled={loading}
+            >
+              {loading
+                ? "🔄 Analyzing..."
+                : "🔍 Analyze Plant Health"}
+            </button>
+
+            {result && (
+              <div className="analysis-result">
+
+                {result.error ? (
+                  <p>❌ {result.error}</p>
+                ) : (
+                  <>
+                    <h2>🌱 AI Analysis Result</h2>
+
+                    <p>
+                      <strong>Plant / Disease:</strong>{" "}
+                      {formatPrediction(result.prediction)}
+                    </p>
+
+                    <p>
+                      <strong>📊 Confidence:</strong>{" "}
+                      {result.confidence}%
+                    </p>
+
+                    {result.confidence < 60 && (
+                      <p>
+                        ⚠️ Confidence is low. Please upload a
+                        clearer, well-lit leaf image for better
+                        results.
+                      </p>
+                    )}
+
+                    <div className="recommendation">
+                      <h3>💡 Care Recommendation</h3>
+
+                      <p>{recommendation}</p>
+                    </div>
+                  </>
+                )}
+
+              </div>
+            )}
+          </>
         )}
 
         <div className="upload-tips">

@@ -25,11 +25,12 @@ uploaded_file = st.file_uploader(
 
 if uploaded_file is not None:
     image = Image.open(uploaded_file).convert("RGB")
-   st.image(
-    image,
-    caption="Uploaded Plant Image",
-    use_column_width=True
-)
+
+    st.image(
+        image,
+        caption="Uploaded Plant Image",
+        use_column_width=True
+    )
 
     if st.button("🔍 Analyze Plant"):
         with st.spinner("AI is analyzing your plant..."):
@@ -38,7 +39,10 @@ if uploaded_file is not None:
                 predictions = classifier(image, top_k=3)
 
                 st.subheader("🌿 Analysis Results")
-                st.write("**Prediction:**", predictions[0]["label"])
+                st.write(
+                    "**Prediction:**",
+                    predictions[0]["label"]
+                )
                 st.write(
                     "**Confidence:**",
                     f"{predictions[0]['score'] * 100:.2f}%"

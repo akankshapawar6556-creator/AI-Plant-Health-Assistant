@@ -6,3 +6,4 @@ optimum[onnxruntime]
 transformers
 torch
 onnxruntime
+requests

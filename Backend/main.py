@@ -5,6 +5,8 @@ from optimum.onnxruntime import ORTModelForImageClassification
 from transformers import AutoImageProcessor
 import torch
 import io
+import os
+import requests
 
 app = FastAPI(title="AI Plant Health Assistant")
 
@@ -19,9 +21,33 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-print("Loading quantized ONNX model...")
+MODEL_DIR = "./model_files"
+os.makedirs(MODEL_DIR, exist_ok=True)
 
-MODEL_DIR = "./onnx_model_quantized"
+BASE_URL = "https://github.com/akankshapawar6556-creator/AI-Plant-Health-Assistant/releases/download/v1.0-model"
+
+FILES = [
+    "config.json",
+    "model_quantized.onnx",
+    "ort_config.json",
+    "preprocessor_config.json",
+]
+
+for fname in FILES:
+    fpath = os.path.join(MODEL_DIR, fname)
+    if not os.path.exists(fpath):
+        print(f"Downloading {fname}...")
+        url = f"{BASE_URL}/{fname}"
+        r = requests.get(url, stream=True)
+        r.raise_for_status()
+        with open(fpath, "wb") as f:
+            for chunk in r.iter_content(chunk_size=8192):
+                f.write(chunk)
+        print(f"{fname} downloaded!")
+    else:
+        print(f"{fname} already exists, skipping.")
+
+print("Loading quantized ONNX model...")
 
 processor = AutoImageProcessor.from_pretrained(MODEL_DIR)
 model = ORTModelForImageClassification.from_pretrained(

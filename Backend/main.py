@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from PIL import Image
 from optimum.onnxruntime import ORTModelForImageClassification
 from transformers import AutoImageProcessor
-import torch
+import numpy as np
 import io
 import os
 import requests
@@ -67,18 +67,22 @@ async def analyze_plant(file: UploadFile = File(...)):
     image_bytes = await file.read()
     image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
 
-    inputs = processor(images=image, return_tensors="pt")
-    with torch.no_grad():
-        outputs = model(**inputs)
+    inputs = processor(images=image, return_tensors="np")
 
+    outputs = model(**inputs)
     logits = outputs.logits
-    probs = torch.nn.functional.softmax(logits, dim=-1)[0]
 
-    top_k = torch.topk(probs, k=3)
-    labels = [model.config.id2label[i.item()] for i in top_k.indices]
+    # Softmax manually
+    exp_logits = np.exp(logits - np.max(logits, axis=-1, keepdims=True))
+    probs = exp_logits / np.sum(exp_logits, axis=-1, keepdims=True)
+    probs = probs[0]
+
+    # Top 3
+    top_indices = np.argsort(probs)[::-1][:3]
+    labels = [model.config.id2label[int(i)] for i in top_indices]
 
     predictions = [
-        {"label": labels[i], "score": float(top_k.values[i])}
+        {"label": labels[i], "score": float(probs[top_indices[i]])}
         for i in range(len(labels))
     ]
 

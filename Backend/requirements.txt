@@ -2,6 +2,7 @@ fastapi
 uvicorn
 python-multipart
 pillow
+optimum[onnxruntime]
 transformers
 torch
-torchvision
+onnxruntime

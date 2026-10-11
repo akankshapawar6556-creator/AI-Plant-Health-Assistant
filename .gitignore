@@ -1,2 +1,6 @@
 
 Backend/venv/
+Backend/onnx_model/
+Backend/venv/
+Backend/main_backup_pytorch.py
+Backend/__pycache__/

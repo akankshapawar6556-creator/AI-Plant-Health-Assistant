@@ -1,7 +1,9 @@
 from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from PIL import Image
-from transformers import pipeline
+from optimum.onnxruntime import ORTModelForImageClassification
+from transformers import AutoImageProcessor
+import torch
 import io
 
 app = FastAPI(title="AI Plant Health Assistant")
@@ -17,38 +19,47 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-print("Loading AI model...")
+print("Loading quantized ONNX model...")
 
-classifier = pipeline(
-    "image-classification",
-    model="kimcomehome/plantvillage-vit-leaf-disease"
+MODEL_DIR = "./onnx_model_quantized"
+
+processor = AutoImageProcessor.from_pretrained(MODEL_DIR)
+model = ORTModelForImageClassification.from_pretrained(
+    MODEL_DIR, file_name="model_quantized.onnx"
 )
 
-print("AI model loaded successfully!")
+print("Model loaded successfully!")
 
 
 @app.get("/")
 def home():
-    return {
-        "message": "AI Plant Health Assistant Backend is running!"
-    }
+    return {"message": "AI Plant Health Assistant Backend is running!"}
 
 
 @app.post("/analyze")
 async def analyze_plant(file: UploadFile = File(...)):
-
     image_bytes = await file.read()
+    image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
 
-    image = Image.open(
-        io.BytesIO(image_bytes)
-    ).convert("RGB")
+    inputs = processor(images=image, return_tensors="pt")
+    with torch.no_grad():
+        outputs = model(**inputs)
 
-    predictions = classifier(image, top_k=3)
+    logits = outputs.logits
+    probs = torch.nn.functional.softmax(logits, dim=-1)[0]
+
+    top_k = torch.topk(probs, k=3)
+    labels = [model.config.id2label[i.item()] for i in top_k.indices]
+
+    predictions = [
+        {"label": labels[i], "score": float(top_k.values[i])}
+        for i in range(len(labels))
+    ]
 
     return {
         "filename": file.filename,
         "status": "analysis_complete",
         "prediction": predictions[0]["label"],
         "confidence": round(predictions[0]["score"] * 100, 2),
-        "top_predictions": predictions
+        "top_predictions": predictions,
     }

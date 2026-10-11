@@ -3,4 +3,5 @@ backend/venv/
 __pycache__/
 *.pyc
 node_modules/
-frontend/dist/
+frontend/dist/onnx_model/
+main_backup_pytorch.py

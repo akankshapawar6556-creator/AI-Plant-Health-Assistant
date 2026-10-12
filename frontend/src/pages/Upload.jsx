@@ -55,7 +55,7 @@ function Upload() {
 
     try {
       const response = await fetch(
-        "https://ai-plant-health-assistant-2.onrender.com/analyze",
+     "https://ai-plant-health-assistant-1.onrender.com/analyze",
         {
           method: "POST",
           body: formData,

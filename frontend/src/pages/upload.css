@@ -319,3 +319,139 @@
     transform: translateY(0);
   }
 }
+/* ===== MOBILE RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .upload-page {
+    padding: 16px !important;
+  }
+
+  .upload-container {
+    padding: 20px 16px !important;
+    max-width: 100% !important;
+  }
+
+  .upload-header {
+    padding: 14px 16px !important;
+  }
+
+  .upload-header span {
+    font-size: 18px !important;
+  }
+
+  .upload-intro h1 {
+    font-size: 28px !important;
+    line-height: 1.2 !important;
+    text-align: center !important;
+  }
+
+  .upload-intro p {
+    font-size: 14px !important;
+    text-align: center !important;
+  }
+
+  .upload-box {
+    padding: 24px 16px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    gap: 12px !important;
+  }
+
+  .upload-box h2 {
+    font-size: 18px !important;
+    text-align: center !important;
+    margin: 0 !important;
+  }
+
+  .upload-box p {
+    font-size: 14px !important;
+    text-align: center !important;
+    margin: 0 !important;
+  }
+
+  .upload-icon {
+    font-size: 42px !important;
+  }
+
+  .browse-btn {
+    width: 100% !important;
+    max-width: 240px !important;
+    padding: 12px 20px !important;
+    font-size: 15px !important;
+  }
+
+  .upload-box small {
+    font-size: 12px !important;
+    text-align: center !important;
+    display: block !important;
+  }
+
+  .plant-preview {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+
+  .file-name {
+    font-size: 13px !important;
+    word-break: break-all !important;
+    text-align: center !important;
+  }
+
+  .preview-buttons {
+    flex-direction: column !important;
+    width: 100% !important;
+    gap: 8px !important;
+  }
+
+  .change-btn,
+  .remove-btn {
+    width: 100% !important;
+    padding: 10px !important;
+  }
+
+  .analyze-btn {
+    width: 100% !important;
+    padding: 14px !important;
+    font-size: 15px !important;
+  }
+
+  .analysis-result {
+    padding: 16px !important;
+  }
+
+  .analysis-result h2 {
+    font-size: 18px !important;
+  }
+
+  .analysis-result p {
+    font-size: 14px !important;
+    line-height: 1.5 !important;
+  }
+
+  .upload-tips {
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+
+  .upload-tips > div {
+    width: 100% !important;
+  }
+}
+
+/* Extra small phones */
+@media (max-width: 480px) {
+  .upload-intro h1 {
+    font-size: 24px !important;
+  }
+
+  .upload-header span {
+    font-size: 16px !important;
+  }
+
+  .upload-badge {
+    font-size: 11px !important;
+    padding: 6px 12px !important;
+  }
+}

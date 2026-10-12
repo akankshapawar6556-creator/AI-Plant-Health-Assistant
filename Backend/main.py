@@ -12,13 +12,12 @@ app = FastAPI(title="AI Plant Health Assistant")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "https://ai-plant-health-assistant-2z00u5rud-ak-a616.vercel.app",
-    ],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+  allow_origins=[
+    "http://localhost:5173",
+    "https://ai-plant-health-assistant-alpha.vercel.app",
+    "https://ai-plant-health-assistant.vercel.app",
+    "https://*.vercel.app",
+],
 )
 
 MODEL_DIR = "./model_files"
